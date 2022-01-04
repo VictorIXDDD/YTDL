@@ -4,6 +4,8 @@
 ###Unicode Type : gb18030  # -*- coding: utf-8 -*-
 
 # ==============================================================================================================================================================================
+# 此為嘗試Debug前的版本
+# ==============================================================================================================================================================================
 # 已知問題:
 # 1.下載過撥放清單後,會沒辦法下載以下載過的數量  例:下載網址1的 前2個影片   之後,下載網址2的 前3個影片,會只下載第三個影片
 # -可能的問題點 file_index < len(videos)   422line
@@ -81,19 +83,7 @@ import subprocess
 import threading
 import tkinter.messagebox as msg
 
-def Reset_var(): #暫時用的
-    global url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos
-    url_error = 0
-    url = ""
-    res = ""
-    args = {}
-    List_END = 0
-    fileobj = {}
-    download_count = 0
-    file_index = 0
-    input_error = 0
-    input_limit = []
-    call_var(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
+
 ### - 初始化
 url_error = 0
 url = ""
@@ -146,7 +136,7 @@ def setting_read():
 
 #################################
 #debug 1 = true
-debug = 1
+debug = 0
 #################################
 
 
@@ -336,13 +326,7 @@ def merge_media(url_error, url, res, args, List_END, fileobj, download_count, fi
         DL_List_res.insert(END, (str(res_Label[int(res_var.get())-1])+"P"))
         print('視訊和聲音合併完成')
         if isList == 1 :
-            check_urls(1, url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
-            # if file_index == len(videos) :#暫時的解決方案,避免換網址之後還是不載清單
-            #     call_var(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DL_num, 0, 0)
-            #     DLing_info.set('以下載此次的數量')
-            #     print("以下載過要下載的數量")
-        print(file_index)
-        TK_lock(0)
+            check_urls(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
     except Exception as error:
         p(error)
         print('視訊和聲音合併失敗')
@@ -352,15 +336,13 @@ def onComplete(stream, file_path):
     # print(stream, file_path)
     # call_var(1)
     # check_var(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
-    download_count = call_var(1,NeedVar=6)
-    DL_num = call_var(1,NeedVar=10)
     fileobj['name'] = os.path.basename(file_path)
     p(("fileobj['name'] :",fileobj['name']))
     fileobj['dir'] = os.path.dirname(file_path)
     p(("fileobj['dir'] :",fileobj['dir']))
     print('\r')
     print("download_count :","None")
-
+    download_count = call_var(1,NeedVar=6)
     print("download_count :",download_count)
     if download_count == 1:
         if check_media(file_path) == -1:
@@ -376,18 +358,12 @@ def onComplete(stream, file_path):
 
             print('準備下載聲音檔')
             vars(args)['a'] = True  # 設定成a參數
-            
+            call_var(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
             download_media(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)    # 下載聲音
         else:
             print('此影片有聲音，下載完畢！')
-            
-            DL_num +=1
-            DL_List_num.insert(END, DL_num)
-            DL_List_name.insert(END, fileobj['name'])
-            DL_List_res.insert(END, (str(res_Label[int(res_var.get())-1])+"P"))
-            call_var(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
             if isList == 1 :
-                check_urls(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
+                check_urls(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
     else:
         try:
             # 聲音檔重新命名
@@ -429,22 +405,17 @@ def TK_lock(TorF) :
         DL_Button_txt.set('下載')
         DLing_info.set('下載完成')
 
-def check_urls(isEND, url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos):
+def check_urls(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos):
     download_count = 1
     call_var(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
-    print("file_index :",file_index," | ","videos :",videos)
+
     if file_index < len(videos):
         vars(args)['url'] = videos[file_index]  # 設定成url參數
         file_index = file_index + 1
         print("下載影片：", vars(args)['url'])
         call_var(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
         download_media(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
-    if file_index == len(videos) and isList != 1 and isEND == 1 :#暫時的解決方案,避免換網址之後還是不載清單
-        print("in")
-        call_var(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DL_num, 0, videos)
-        DLing_info.set('以下載此次的數量')
-        print("以下載過要下載的數量")
-        print(file_index)
+    if file_index == len(videos):
         TK_lock(0)
         
 
@@ -486,7 +457,7 @@ def YT_catcher(url_error, url, res, args, List_END, fileobj, download_count, fil
             return
         print("! 開始下載播放清單 !")
         p(("videos :",videos))
-        check_urls(0,url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
+        check_urls(url_error, url, res, args, List_END, fileobj, download_count, file_index, input_error, input_limit, DL_num, isList, videos)
     else :
         print("! 開始下載影片 !")
         
@@ -627,7 +598,6 @@ def DL_url(url_error, url, res, args, List_END, fileobj, download_count, file_in
     DL_Button.config(state=tk.DISABLED)
     DL_Button_txt.set('下載')
     List_END = listtxt.get()
-    p(("listtxt.get() :",listtxt.get()))
     url = urltxt.get()
     res = res_var.get()
     Simple_check_YTURL(url)
@@ -934,7 +904,6 @@ Scrollbar.config(command=DL_List_name.yview)
 # 
 # 正在撥放的撥放清單:
 # https://www.youtube.com/watch?v=0firv69LkgI&list=PLAo9RlHR2tDakgakxbOxT9dAZD0rpwvXQ&ab_channel=TowaCh.%E5%B8%B8%E9%97%87%E3%83%88%E3%83%AF
-# https://www.youtube.com/watch?v=vadr23RbVy8&list=PLYPOf_523g9WyMzCIFt14FwILyvY6Nuzs&ab_channel=%E6%9C%88%E4%B9%83%2FTsukinoChannel
 # 撥放清單:
 # https://www.youtube.com/playlist?list=PLB8Nt5W7hnKA_pG2qljWbgVmJPobrLTm4
 # 帳號推薦的合集網址:
