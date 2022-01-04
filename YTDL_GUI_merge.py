@@ -57,9 +57,9 @@ def p(txt):
 
 #導入模組
 import os
+print('檢查必要套件，缺少時將嘗試自動進行安裝。')
+os.system('pip install -r requirements.txt | find /V "already satisfied"')
 from time import sleep
-# print('檢查必要套件，缺少時將嘗試自動進行安裝。')
-# os.system('pip install -r requirements.txt | find /V "already satisfied"')
 import tkinter as tk
 from tkinter.constants import BOTH, BOTTOM, END, EXTENDED, LEFT, RIGHT, TOP
 import argparse
@@ -69,6 +69,7 @@ from pytube import Playlist
 import subprocess
 import threading
 import tkinter.messagebox as msg
+
 
 ### - 初始化
 url_error = 0
